@@ -15,7 +15,7 @@ const userController ={
       });
     },
     createU({body},res){
-        User.create(req)
+        User.create(body)
         .then((newData) => res.json(newData))
         .catch((err) => res.json(err));
     },
@@ -30,6 +30,28 @@ const userController ={
           })
           .catch(err => res.json(err));
     },
+    getUById({ params }, res) {
+        User.findOne({ _id: params.id })
+          .populate({
+            path: 'thoughts',
+            select: '-__v'
+          })
+          .populate({
+            path: 'friends',
+            select: '-__v'
+          })
+          .then(dbUserData => {
+            if (!dbUserData) {
+              res.status(404).json({ message: 'User ID not found' });
+              return;
+            }
+            res.json(dbUserData);
+          })
+          .catch(err => {
+            console.log(err);
+            res.sendStatus(400);
+          });
+      },
     deleteU({params},res){
         User.deleteOne({ _id: params.id })
         .then(res.json(`succsessfully deleted`))
@@ -76,3 +98,14 @@ module.exports = userController
 //     deleteU,
 //     addToFriends,
 //     removeFromFriends
+// .then(dbUserData => {
+//     if (!dbUserData) {
+//       res.status(404).json({ message: 'User ID not found' });
+//       return;
+//     }
+//     res.json(dbUserData);
+//   })
+//   .catch(err => {
+//     console.log(err);
+//     res.sendStatus(400);
+//   });
